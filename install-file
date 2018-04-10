@@ -13,6 +13,8 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
    关闭防火墙：service iptable off
    开启某个端口：-A INPUT -m state --state NEW -m tcp -p tcp --dport 3306 -j ACCEPT
 
+   注：要是都在局域网内，都却访问不了另外一台主机，可以 systemctl status firewalld 看看防火墙的状态是否开启
+
 3、软件安装
 	1、apache 我直接用yum 源安装了 yum -y -q install apr-devel apr-util-devel openssl-devel pcre-devel mod_ssl expat-devel
 	2、php  编译安装 可以从官网下载包，http://am1.php.net/distributions/php-7.2.4.tar.gz 
@@ -77,4 +79,15 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
 		然后在 php.ini 文件里添加 extension = redis.so  重启 php-fpm，至此，php -m 就可以看到redis模块了（不重启也可以看到，但实际上还没加载在php-fpm里）
 
 
+5、用PHP怎么少得了composer呢，composer的安装也简单，直接下载 ： 
 
+	wget https://getcomposer.org/download/1.6.3/composer.phar
+	ln -s composer.phar /usr/local/bin/composer
+
+	然后直接可以使用composer了，不过我觉得直接把composer.phar文件下载在/usr/local/bin文件直接使用更加方便，呵呵。。。
+	噢，对了，在国内一般推荐使用中国镜像，感谢免费的镜像服务
+	直接修改： composer config -g repo.packagist composer https://packagist.phpcomposer.com   
+
+	至于如何使用composer,新建个 composer.json文件，然后 composer require "swonzhang/swon"  这样就可以把swon文件加载到vender文件里了
+
+6、编辑器，在window环境下，我习惯用sublime ,可是在linux系统里，sublime并不支持中文输入，好像ubantu可以使用插件解决；而centos则没找到太有效的资料。
