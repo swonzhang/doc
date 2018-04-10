@@ -63,6 +63,18 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
  	
 	好，然后重启 httpd ； systemctl restart httpd; httpd和php安装完成 ！！！撒花。。。
 
-4、PHP拓展安装,PHP的拓展安装好像有两种方式
-	
-	
+4、PHP拓展安装,PHP的拓展安装好像有两种方式, 一个是编译安装，一个是pecl安装下面分别说明
+	1、编译安装，这个得下载源文件， 例如redis， 
+		wget http://pecl.php.net/get/redis-4.0.0.tgz
+		tar xzvf redis-4.0.0.tgz
+		cd 	redis-4.0.0.tgz	
+		/usr/local/php7/bin/phpize
+		./configure --with-php-config=/usr/local/php/bin/php-config
+		make && make install
+		然后在 php.ini 文件里添加 extension = redis.so  重启 php-fpm，至此，php -m 就可以看到redis模块了
+	2、通过pecl安装， 例如安装swoole模块,当然这个只能安装pecl收录的拓展
+		直接 /usr/local/php7/bin/pecl install swoole
+		然后在 php.ini 文件里添加 extension = redis.so  重启 php-fpm，至此，php -m 就可以看到redis模块了（不重启也可以看到，但实际上还没加载在php-fpm里）
+
+
+
