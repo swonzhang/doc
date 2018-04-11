@@ -1,0 +1,5 @@
+
+	之前一直断断续续地了解RabbitMq,然后也在window下安装了RabbitMq的服务，window下的安装就是简单，一键安装，且零配置。但是，自己玩了一阵子RabbitMq,后来又忙于其他事情，便也忽略了。现在又在了解消息中间件，现公司用的是kafka,于是也就又进而了解这个东东。下面说说入坑过程；
+
+	参考网站：https://www.cnblogs.com/wangxiaoqiangs/p/7831990.html
+
