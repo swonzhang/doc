@@ -3,3 +3,46 @@
 
 	参考网站：https://www.cnblogs.com/wangxiaoqiangs/p/7831990.html
 
+	主要碰到的坑是，内网使用生产者正常，但是外网生产者生成不了信息，我大概也知道问题出在哪？但这还是困扰了我两天，主要是，不知道怎样配置是正确，这其中是调错的过程。
+
+	zookeeper 的配置文件我觉得不需要怎么改，至少我没改吧，如下：
+
+	vim config/zookeeper.properties
+
+	# the directory where the snapshot is stored.
+	dataDir=/tmp/zookeeper
+	# the port at which the clients will connect
+	clientPort=2181
+	# disable the per-ip limit on the number of connections since this is a non-production config
+	maxClientCnxns=0
+
+	然后是kafka的配置文件，这里最坑。。。。，如下：
+
+	vim config/server.properties
+
+	# The address the socket server listens on. It will get the value returned from 
+	# java.net.InetAddress.getCanonicalHostName() if not configured.
+
+	# 这个listeners 我本来是开启的，外网死活不通，于是把它关了
+	#listeners=PLAINTEXT://kb-node01:9092
+
+	# Hostname and port the broker will advertise to producers and consumers. If not set, 
+	# it uses the value for "listeners" if configured.  Otherwise, it will use the value
+	# returned from java.net.InetAddress.getCanonicalHostName().
+
+	// 这个开启了，替换成自己的ip地址即可
+	advertised.listeners=PLAINTEXT://192.168.2.21:9092
+
+
+	# Zookeeper connection string (see zookeeper docs for details).
+	# This is a comma separated host:port pairs, each corresponding to a zk
+	# server. e.g. "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002".
+	# You can also append an optional chroot string to the urls to specify the
+	# root directory for all kafka znodes.
+
+	# 这里的 zk-node01 是zookeeper的ip别名，是在 /etc/hosts 文件添加: 192.168.2.21   zk-node01
+	# 用 localhost 好像不行，但是很多博客推荐使用别名 ，所以，我没有试过直接用ip,暂且不谈
+	zookeeper.connect=zk-node01:2181
+
+
+	上面就配置完了，单节点就是那么简单，撒花。。。。。
