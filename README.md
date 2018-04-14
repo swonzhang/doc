@@ -1,2 +1,2 @@
 # doc
-there many people like record something on github,so do i
+there are many people like record something on github,so do i
