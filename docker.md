@@ -26,5 +26,15 @@ ctrl+P and ctrl+Q  quit the docker
 
 then,into it
 
-5/ docker exec -it containerID  bash
+5\ docker exec -it containerID  bash
+
+Dockerfile
+
+FROM docker.listcloud.cn:5000/nginx-php7
+COPY . /var/www/html
+COPY ./devops/config/default.conf /etc/nginx/nginx.conf
+COPY ./devops/config/vhost.conf /etc/nginx/conf.d/vhost.conf
+COPY ./devops/config/mime.types /etc/nginx/mime.types
+WORKDIR /var/www/html
+
 
