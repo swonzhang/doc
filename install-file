@@ -3,6 +3,19 @@
 
 yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘记哪一个生效了
 
+不行的话，就更换国内源，妥妥的 refer: https://www.cnblogs.com/xjh713/p/7458437.html
+ 备份本地yum源
+ mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo_bak 
+
+ 获取阿里yum源配置文件
+ wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo 
+
+ 更新cache
+ yum makecache 
+
+ 查看
+ yum -y update 
+ 
 2、防火墙，对于服务，肯定要打开端口让人访问，不过我在虚拟机操作，一般都是直接关闭防火墙
    
   CentOs7 用的是firewall和 systemctl 管理

@@ -44,3 +44,5 @@ git config --system http.sslverify false
 over! 
 
 refer: https://blog.csdn.net/tao_627/article/details/51408097
+
+当然即使是https，也可以使用记住密码的方式来免输， refer: https://www.jianshu.com/p/81ae6e77ff47
