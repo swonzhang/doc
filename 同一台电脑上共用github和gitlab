@@ -1,0 +1,34 @@
+
+由于公司用的是搭建的gitlab,但是自己也会经常使用到gitbub,或者码云之类的git工具
+
+so,
+
+生成公匙和私匙
+
+ssh-keygen -t rsa -C "personal@company.com"
+
+
+这样会生成 id_rsa 和 id_rsa.pub 两个文件，当然你也可以改变它的命名；
+
+
+然后打开 id_rsa.pub 文件，复制里面的数据，配置放到github上，
+
+然后测试  ssh -T git@github.com
+
+
+ok就可以了，但我碰到另外一个问题
+出现类似：
+
+	 error setting certificate verify locations:
+
+这样的错误:
+然后：执行命令：
+
+git config --system http.sslcainfo "C:\Program Files (x86)\git\bin\curl-ca-bundle.crt"
+1
+（注意修改为正确的文件路径）或
+
+git config --system http.sslverify false
+
+
+就ok了
