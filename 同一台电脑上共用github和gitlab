@@ -32,3 +32,15 @@ git config --system http.sslverify false
 
 
 就ok了,这里有个问题就是每次push ，都要重新输入账号密码，这个下次解决
+
+
+知道问题所在了，据说是用了 https 连接的问题，改为ssh方式即可解决
+
+
+查看方式： git remote -v
+
+修改方式： git remote add origin   "ssh链接或https链接"
+
+over! 
+
+refer: https://blog.csdn.net/tao_627/article/details/51408097
