@@ -1,5 +1,12 @@
 
+安装docker: 
 
+refer: https://www.cnblogs.com/yufeng218/p/8370670.html
+
+yum install docker
+
+
+安装docker镜像
 refer: https://blog.csdn.net/S_gy_Zetrov/article/details/78161154
 
 
