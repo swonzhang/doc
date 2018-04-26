@@ -31,4 +31,4 @@ git config --system http.sslcainfo "C:\Program Files (x86)\git\bin\curl-ca-bundl
 git config --system http.sslverify false
 
 
-就ok了
+就ok了,这里有个问题就是每次push ，都要重新输入账号密码，这个下次解决
