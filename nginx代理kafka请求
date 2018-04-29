@@ -88,3 +88,4 @@
 	有空看看这个：https://github.com/edenhill/librdkafka
 
 
+	附：用了代理后，直接可以通过post请求发送 producer,就不用通过kafka-php包，发送了。
