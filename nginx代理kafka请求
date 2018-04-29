@@ -1,0 +1,90 @@
+
+缘由：公司的服务业务都放在docker里，现在，我在宿主机里使用了kafka,希望主机上的所有docker可以共用这个kafka服务（其实也不必如此，新建一个docker直接把kafka放进去也行，这个也暂且不提），而现在的问题就是，在docker里面的服务请求不了宿主机的9092端口的kafka服务，报“no route to host”，但是访问80端口就是ok的，对于这个问题，我咨询了我们的运维。他说，这个可能是阿里云的防火墙问题，只能访问80端口。但是，我觉得也有可能是docker的问题，经过查询很多资料，也都指向这个问题。（注：我在我的电脑上，测试，docker是可以访问宿主机的其他端口的，所以我估计应该是配置问题），这个问题可以容后再仔细研究。我现在的问题是如何是的docker里面的服务可以请求宿主机的kafka服务，运维建议我，在宿主机的nginx做个代理转发，80转发到9092端口。好，目前看起来也只能这样了。
+
+操作：
+	1、我们给kafka服务专门使用了个域名 "xxx-kafka.com",
+	（注：这个是错误的做法，）
+	2、修改nginx的配置文件 nginx.conf，
+
+	    #kafka config proxy
+   
+		server {
+		  
+		        server_name xxx-kafka.com;	  
+		        charset utf-8;
+		  
+		        client_max_body_size 100m;
+		        client_body_buffer_size 10240k;		  
+		        access_log /var/log/nginx/kafka.a.log proxy;
+		        error_log  /var/log/nginx/kafka.e.log notice;
+
+		        location / {
+		          proxy_pass http://xxx-kafka.com:9092;     
+		          }                                                                                  
+		}
+
+		ok，完工， "nginx -t",配置没错，重启nginx , nginx -s reload
+
+	3、好，现在可以测试了，使用 kafka-php的测试代码去请求kafka,额，没用啊。。。报 “Recv failure: Connection reset by peer”
+
+		这下我就郁闷了，然后去群里咨询各位大神，我才恍然大悟，nginx代理的是http协议，而kafka使用的是tcp协议啊，这下子麻烦了，然后我就各种百度谷歌，发现了个“Nginx Kafka Module”,nginx组件，专门用来代理kafka的，(refer:https://github.com/brg-liuwei/ngx_kafka_module#table-of-contents),我如获新生，然后按照其中步骤安装，安装详细上面连接中皆有说明，我就说下自己遇到的坑。
+
+		(1)动态添加模块，首先得，nginx -V,看以前安装的配置，然后在在这些配置后面加上 --add-dynamic-module=/path/to/ngx_kafka_module ,然后找到源文件，configure 然后 make -f objs/Makefile modules, 这时，在源文件的 objs文件夹里就会生成ngx_http_kafka_module.so文件，再make ,然后objs文件夹里也会重新生成nginx执行文件。好，这时，把ngx_http_kafka_module.so 拷贝到 nginx安装文件的modules目录里。
+		(2)先退出nginx,"nginx -s quit",然后修改nginx.conf文件，添加一句 “ "load_module modules/ngx_http_kafka_module.so" ”;好，启动nginx, " nginx -s reload ",
+		报错 "nginx: [emerg] dlopen() "/usr/local/nginx/modules/ngx_http_kafka_module.so failed (librd.so.1: cannot open shared object file: No such file or directory) in /etc/nginx/nginx.conf:9" 我一脸蒙蔽，这什么鬼，好，继续百度，终于找到(refer:https://www.58jb.com/html/182.html),感谢前辈踩坑后的分享，
+
+        (3) 执行语句： ln -sf /usr/local/nginx/modules/ngx_http_kafka_module.so /lib64/librd.so.1  ，ok,再启动nginx,终于没报错。已经实现动态加载kafka module了，现在可以正式配置了，
+    4、配置nginx.conf ,
+
+    http {
+
+    # some other configs
+
+    kafka;
+
+    #kafka_broker_list 127.0.0.1:9092 127.0.0.1:9093; # host:port ...
+    kafka_broker_list xxx-kafka.com:9092;
+
+    server {
+
+        # some other configs
+        # 自定义路径， 例如 /kafka/kafka-test,请求路径就是 xxx-kafka.com/kafka/kafka-test, 就是topic是kafka-test,这个完全可以自定义的
+        location = /your/path/topic {
+            # optional directive: kafka_partition [<partition-num> | auto]
+            #
+            # kafka_partition auto; # default value
+            # kafka_partition 0;
+            # kafka_partition 1;
+
+            kafka_topic your_topic;
+        }
+    }
+	}
+
+
+	配置完毕，重启nginx. nginx -s reload
+
+
+	5、测试
+
+	curl -v xxx-kafka.com/kafka/kafka-test -d "hello ngx_kafka_module"
+
+
+	在消费端打开：
+	sh bin/kafka-console-consumer.sh --bootstrap-server xxx-kafka.com:9092 --topic kafka-test --from-beginning
+
+	就会收到 "hello ngx_kafka_module",
+
+	代理成功，完美撒花！！！
+
+
+	参考资料：
+
+	https://github.com/brg-liuwei/ngx_kafka_module#table-of-contents
+	https://www.58jb.com/html/182.html
+	https://my.oschina.net/u/2253438/blog/1594503
+
+
+	有空看看这个：https://github.com/edenhill/librdkafka
+
+
