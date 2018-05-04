@@ -113,3 +113,9 @@ Usage: docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
                                 always：容器退出时总是重启    
   --rm=false                 指定容器停止后自动删除容器(不支持以docker run -d启动的容器)    
   --sig-proxy=true           设置由代理接受并处理信号，但是SIGCHLD、SIGSTOP和SIGKILL不能被代理
+
+docker install  refer: http://blog.sina.com.cn/s/blog_4d22b9720102x7v5.html
+  
+
+
+  docker run --name=kafka -e HOST_IP=localhost -e ZK=zk -p 9092 --link zookeeper:zk -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 -e KAFKA_ADVERTISED_PORT=9092 -e KAFKA_BROKER_ID=1 -e KAFKA_ADVERTISED_HOST_NAME=localhost  -t wurstmeister/kafka 
