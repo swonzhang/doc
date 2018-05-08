@@ -1,0 +1,6 @@
+
+1、tcp server接收到硬件数据后，通过websocket发送数据到app上，思路：在tcp服务的接收回调上调用websocket推送消息到app
+
+相反，websocket收到消息，如何通过tcp (server or client)发送消息到硬件？recevMsg时调起服务？
+
+

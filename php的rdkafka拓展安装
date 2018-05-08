@@ -1,0 +1,27 @@
+
+
+php的rdkafka拓展依赖于 The Apache Kafka C/C++ library，所以先安装librdkafka
+
+1、从github上拉下来，
+	
+	git clone https://github.com/edenhill/librdkafka.git
+
+	cd librdkafka/
+	./configure
+	make && make install
+
+2、安装 rdkafka拓展，
+	
+
+	wget https://pecl.php.net/get/rdkafka-3.0.5.tgz
+
+	tar -xzvf rdkafka-3.0.5.tgz
+	cd rdkafka-3.0.5
+	/usr/local/php7/bin/phpize
+	./configure --with-php-config = /usr/local/php7/bin/php-config
+	make && make install
+
+	安装成功后，在php.ini文件里添加  
+	extension = rdkafka.so
+
+3、 重启php-fpm, kill -USR2 pid ,然后 php -m,即可看到已经加载rdkafka拓展
