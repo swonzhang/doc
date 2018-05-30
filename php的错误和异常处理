@@ -1,0 +1,13 @@
+
+refer: https://yuerblog.cc/2018/05/21/know-about-php7-error-and-exception/
+
+
+据我所知，php的异常有两个类处理， Error 和 Exception, 而这两个类都继承于Throwable类。
+
+关键函数： set_error_handle(call_back,$error_level)
+			set_exception_handle(call_back)
+
+
+set_error_handle 捕捉的错误异常有限，一些致命错误无法捕捉，所以需要通过 try catch来获取，但是，也得兼顾抛出的异常，所以可以catch(Throwable $e),这样就可以捕捉抛出的异常，但是有时候，也不想所有的错误都想通过try catch获取，所以可以通过set_exception_handle来处理。
+
+

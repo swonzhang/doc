@@ -65,6 +65,9 @@ COPY ./devops/config/mime.types /etc/nginx/mime.types
 WORKDIR /var/www/html
 
 
+编辑好之后，在相同目录下运行：docker build -t swon/nginx-php7 .
+
+注意后面那一点，表示是当前目录，建立后之后，docekr images,即可看到自己打包的镜像 
 
 有时候需要挂载docker的文件在宿主机
 
