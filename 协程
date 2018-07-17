@@ -1,0 +1,16 @@
+
+<?php
+
+function task($max) {
+    $tid = (yield getTaskId()); // <-- here's the syscall!, 关键字yield后面的getTaskId()返回给函数外部，函数外部通过send数据到函数内部，替换yield关键字
+    for ($i = 1; $i <= $max; ++$i) {
+        echo "This is task $tid iteration $i.\n";
+        yield;
+    }
+}
+
+
+$tk = task(1);
+$tk->current();
+$tk->next();
+$tk->send('g');
