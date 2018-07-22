@@ -104,3 +104,15 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
 	至于如何使用composer,新建个 composer.json文件，然后 composer require "swonzhang/swon"  这样就可以把swon文件加载到vender文件里了
 
 6、编辑器，在window环境下，我习惯用sublime ,可是在linux系统里，sublime并不支持中文输入，好像ubantu可以使用插件解决；而centos则没找到太有效的资料。
+
+
+
+7、centos7下安装chrome浏览器，参考:https://blog.csdn.net/qq_36068954/article/details/80687971
+	注意:不能翻墙的,gpgcheck=0 ,这个值设置为0；然后root不能启动，把SELINUX=disabled
+
+	还会出现From what I can tell, the symbol gdk_screen_get_monitor_scale_factor 这个错误，只需要 ： yum install gtk3-devel
+
+倘若安装失败，有可能 sudo yum remove libvirt-client
+然后再安装： sudo yum install libreoffice-math
+
+即可启动 chrome
