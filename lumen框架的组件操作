@@ -1,0 +1,34 @@
+
+1、console
+	
+	命令 "php artisan make:command  MyCommand" 会在 app/Console/Commands 目录创建一个MyCommand文件，其中有个 handle 方法，
+	1、 php artisan MyCommand 即为执行命令后会执行的函数方法。例如用在队列消费，用while(1),
+	2、 php artisan schedule:run 其次亦可以用schedule时间计划执行，要修改app/Console目录下的kernel.php文件里的 schedule函数，设置执行计划，即是连接linux系统下的crond定时服务，定时执行。
+
+	
+2、jobs
+
+	异步队列任务
+	执行 "php artisan make:job  Example"
+	会在目录 app/jobs ，生成Example.php文件，其中有handle函数，即为异步队列中要执行的函数，
+	在控制器里放入代码 $this->dispatch(new Example());  ，即是放进了队列，当然要先执行队列监听 "php artisan queue:listen",如此就完成了异步队列任务。
+
+3、event listener
+	
+	监听事件，
+	在 /bootstrap/app.php 文件下开启 $app->register(App\Providers\EventServiceProvider::class);
+	然后在 EventServiceProvider 添加绑定监听事件
+	protected $listen = [
+        'App\Events\ExampleEvent' => [
+            'App\Listeners\ExampleListener',
+        ],
+    ];
+
+	app/Events 目录，Event对象的保存和设置属性变量，ExampleEvent.php 
+	app/Listenters 目录， ExampleListener.php , handle函数执行任务，其有一个参数 (Event $event),即为ExampleEvent的对象
+	在控制器里放入代码 Event::fire(new ExampleEvent(['jk'=>'fww'])); 即为事件的发生，触发Event,然后Listenters的handle处理
+
+
+	普通用法的话，同步，个人觉得这个有点鸡肋。即相当于调用另外一个函数执行内容而已。
+
+	高级用法，异步通知机制。官网上的例子就是说现在网络服务的实时性要求高，然后比如说，(websocket例子)在网页上，我修改了某某资料，但是其他用户不知道啊，然后呢，我在修改资料后触发事件，然后Listeners的handle里，给各个用户广播事件，xxx修改资料了。应该用IM聊天中，上下线的情况更为形象点。
