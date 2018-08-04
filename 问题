@@ -4,3 +4,7 @@
 相反，websocket收到消息，如何通过tcp (server or client)发送消息到硬件？recevMsg时调起服务？
 
 
+
+Furture模式，使任何一个Request只需要等待时间最长的一个Service而不用串行等待所有的Service。
+
+

@@ -32,3 +32,5 @@
 	普通用法的话，同步，个人觉得这个有点鸡肋。即相当于调用另外一个函数执行内容而已。
 
 	高级用法，异步通知机制。官网上的例子就是说现在网络服务的实时性要求高，然后比如说，(websocket例子)在网页上，我修改了某某资料，但是其他用户不知道啊，然后呢，我在修改资料后触发事件，然后Listeners的handle里，给各个用户广播事件，xxx修改资料了。应该用IM聊天中，上下线的情况更为形象点。
+	ps：
+	Lumen supports several broadcast drivers out of the box: Pusher, Redis, and a log driver for local development and debugging. A configuration example is included for each of these drivers. The  BROADCAST_DRIVER configuration option may be used to set the default driver.
