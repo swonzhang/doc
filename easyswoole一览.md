@@ -20,3 +20,20 @@
 	例如：
 	<?php 
 		$obj = new stdclass();
+		$temp = &$obj['gg4']['vvv'];  // 最神奇的就是可以直接赋予更深层数值
+		$temp = 'ffff';
+		$copy = $obj->getArrayCopy();
+		echo "<pre>";
+		print_r($copy);
+
+		export:
+		Array
+		(
+		    [gg4] => Array
+		        (
+		            [vvv] => ffff
+		        )
+
+		)
+		了解了下php的引用特性，”如果对一个未定义的变量进行引用赋值、引 用参数传递或引用返回，则会自动创建该变量“。
+	
