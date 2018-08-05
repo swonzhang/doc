@@ -35,4 +35,16 @@ Array(
         )
  )
 ```
->了解了下php的引用特性，**如果对一个未定义的变量进行引用赋值、引 用参数传递或引用返回，则会自动创建该变量**。
+>了解了下php的引用特性，_划重点_，**如果对一个未定义的变量进行引用赋值、引 用参数传递或引用返回，则会自动创建该变量**。
+
+
+### 服务命令
+
+即为 **php  easyswoole start|restart|reload|stop|install** 几种模式
+其内涵都在 easywoole 文件里面里，文件位置一般在 _vender/bin/easyswoole_
+
+**下面开始分别说下各种命令：**
+
+```shell
+php easyswoole start
+```
