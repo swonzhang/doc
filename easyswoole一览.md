@@ -74,3 +74,6 @@ $event->hook('frameInitialize');
 $this->errorHandle();
 return $this;
 ```
+
+This is footnote[^1]
+[^1]: explanatory information
