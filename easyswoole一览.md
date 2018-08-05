@@ -65,7 +65,8 @@ $inst    = Core::getInstance()->initialize(); // 一目了然，这就获取核�
 ```
 接下来我们看重点之处的文件，来于 **use EasySwoole\Core\Core;** 首先让我们看下 **initialize（）**函数。
 ```php
-Di::getInstance()->set(SysConst::VERSION,'2.1.1'); 
+//EasySwoole\Core\Core 文件
+Di::getInstance()->set(SysConst::VERSION,'2.1.1');
 Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
 //创建全局事件容器
 $event = $this->eventHook();
@@ -76,8 +77,69 @@ return $this;
 ```
 *`Di::getInstance()->set(SysConst::VERSION,'2.1.1');`这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期(程序全局期，进程全局期、会话期、请求期)的程序全局期，也就是说一旦程序启动，是没法通过reload来重新加载配置文件的，但是却可以在服务启动前，通过代码修改配置或者设置配置信息*
 
-接下来我的重点介绍**全局事件容器**这个东东，`$event = $this->eventHook();`,这语句就是`EasySwooleEvent`前要准备，easyswoole的有四个全局事件（框架初始化事件、主服务创建事件、请求事件、响应后事件），而`$event->hook('frameInitialize');`就是执行框架初始化处理，按照easyswoole文档的说明，这里框架初始化，可以做全局异常捕捉处理、so on;
+接下来我的重点介绍**全局事件容器**这个东东，`$event = $this->eventHook();`,这语句就是`EasySwooleEvent`前要准备，easyswoole的有四个全局事件（框架初始化事件、主服务创建事件、请求事件、响应后事件），而`$event->hook('frameInitialize');`就是执行框架初始化处理，按照easyswoole文档的说明，这里框架初始化，可以做全局异常捕捉处理（$this->errorHandle();）、创建临时目录(`$this->sysDirectoryInit();`)、还有其它的设置配置文件的操作;
+`$this->sysDirectoryInit()`，主要是设置程序pid文件，和swoole.log文件
+`$this->errorHandle()`,主要是设置异常注册和处理，对于异常处理可以参考 [PHP错误与异常处理](https://www.cnblogs.com/zyf-zhaoyafei/p/6928149.html)
+再说多一句，在执行初始化框架时，easyswoole提供了，自定义的捕捉异常处理，` Di::getInstance()->set( SysConst::HTTP_EXCEPTION_HANDLER, \App\ExceptionHandler::class );`,可以自定义抛出异常，这是在==onRequest==中处理的，后面会提到。
+
+到此，`use EasySwoole\Core\Core` 已执行完毕，继续回到easyswoole文件
+```php
+// easyswoole 文件
+$inst = Core::getInstance()->initialize();
+//输出其他的展示数据
+//
+$inst->run();  // 至此，开始进入swoole的世界
+```
+执行run 之后，其实是执行 ==core==里面的`ServerManager::getInstance()->start();`,好戏开始了。让我们看看==start==干了啥。
+```php
+//EasySwoole\Core\Swoole\ServerManager 文件
+public function start():void
+    {
+        $this->createMainServer(); //这这里就是完成主服务启动之前的配置，回调函数、以及其他的前要处理。
+        Cache::getInstance();  // swoole提供的内存操作模块，使用的是 table
+        Cluster::getInstance()->run(); //开始执行集群配置
+        CronTab::getInstance()->run(); //开始执行定义任务
+        $this->attachListener(); // swoole支持多个监听任务
+        $this->isStart = true; // 确认已经执行任务
+        $this->getServer()->start(); // 开始执行swoole模块
+    }
+```
+这里先说`$this->createMainServer()`,看代码
+```php
+////EasySwoole\Core\Swoole\ServerManager 文件
+$this->mainServer->set($setting);
+//创建默认的事件注册器
+$register = new EventRegister();
+$this->finalHook($register);
+EasySwooleEvent::mainServerCreate($this,$register);
+$events = $register->all();
+foreach ($events as $event => $callback){
+    $this->mainServer->on($event, function () use ($callback) {
+        $ret = [];
+        $args = func_get_args();
+        foreach ($callback as $item) {
+            array_push($ret,Invoker::callUserFuncArray($item, $args));
+        }
+        if(count($ret) > 1){
+            return $ret;
+        }
+        return array_shift($ret);
+    });
+}
+return $this->mainServer;
+
+```
 
 
 
-[^1]:你说啥就是啥
+
+
+
+
+
+
+
+
+
+
+
