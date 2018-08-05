@@ -57,7 +57,7 @@ case 'start':
     installCheck();  // 检查easyswoole框架是否搭建了起来，这个函数其实是判断easyswoole.install 文件是否存在来判断
     serverStart($options); //这才是主心骨
 ```
-_serverStart()_ 这个函数才是主要执行内容。而在该函数中最重要的又是以下：这是一个注脚测试[^footer1]。
+_serverStart()_ 这个函数才是主要执行内容。而在该函数中最重要的又是以下：
 ```php
 //easyswoole 文件
 $conf    = Conf::getInstance();  // 这个就是获取配置文件config.php的信息，如何获取的可看前文的配置文件章节
@@ -65,7 +65,7 @@ $inst    = Core::getInstance()->initialize(); // 一目了然，这就获取核�
 ```
 接下来我们看重点之处的文件，来于 **use EasySwoole\Core\Core;** ，首先让我们看下 **initialize（）**函数。
 ```php
-Di::getInstance()->set(SysConst::VERSION,'2.1.1'); //这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期的程序全局期 这是一个注脚测试[^footer1]。
+Di::getInstance()->set(SysConst::VERSION,'2.1.1'); 
 Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
 //创建全局事件容器
 $event = $this->eventHook();
@@ -74,5 +74,6 @@ $event->hook('frameInitialize');
 $this->errorHandle();
 return $this;
 ```
+*`Di::getInstance()->set(SysConst::VERSION,'2.1.1');`这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期(程序全局期，进程全局期、会话期、请求期)的程序全局期，也就是说一旦程序启动，是没法通过reload来重新加载配置文件的，但是却可以在服务启动前，通过代码修改配置或者设置配置信息*
 
-[^footer1]: 这是一个测试，用来阐释注脚。
+
