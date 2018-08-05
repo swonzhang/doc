@@ -75,6 +75,4 @@ $this->errorHandle();
 return $this;
 ```
 
-
- 
 [^footer1]: 这是一个测试，用来阐释注脚。
