@@ -106,11 +106,12 @@ public function start():void
 ```
 这里先说`$this->createMainServer()`,看代码
 ```php
-////EasySwoole\Core\Swoole\ServerManager 文件
-$this->mainServer->set($setting);
+//EasySwoole\Core\Swoole\ServerManager 文件
+
+$this->mainServer->set($setting); // 设置服务配置
 //创建默认的事件注册器
-$register = new EventRegister();
-$this->finalHook($register);
+$register = new EventRegister(); // 即是设置onWorkerStart等等事件
+$this->finalHook($register); //
 EasySwooleEvent::mainServerCreate($this,$register);
 $events = $register->all();
 foreach ($events as $event => $callback){
@@ -129,7 +130,7 @@ foreach ($events as $event => $callback){
 return $this->mainServer;
 
 ```
-
+`$this->finalHook($register)`,这个单独拿出来讲一讲，做了*实例化对象池管理*,还有绑定各种回调函数。
 
 
 
