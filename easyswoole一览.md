@@ -1,5 +1,6 @@
 
 最近自己也在使用swoole搭建框架，由于之前使用了easyswoole,自己在构思过程中，自然而然地会要借鉴easyswoole里面的一些精髓。但是随着工作进行下去，会感觉有许多的模糊的地方。所以现在做个整理一览出来。
+_（注：本说明文档有点抽丝剥茧的意思，所以可能会对每个相关的内容进行有点深度的探究）_
 
 **我先列下几个提纲**
 
@@ -35,16 +36,41 @@ Array(
         )
  )
 ```
->了解了下php的引用特性，_划重点_，**如果对一个未定义的变量进行引用赋值、引 用参数传递或引用返回，则会自动创建该变量**。
+>了解了下php的引用特性，_划重点_，**如果对一个未定义的变量进行引用赋值、引 用参数传递或引用返回，则会自动创建该变量**。[点击查看参考文档](http://php.net/manual/zh/language.references.whatdo.php)
 
 
 ### 服务命令
 
-即为 **php  easyswoole start|restart|reload|stop|install** 几种模式
+即为 **php  easyswoole start|restart|reload|stop|install** 几种命令
 其内涵都在 easywoole 文件里面里，文件位置一般在 _vender/bin/easyswoole_
 
 **下面开始分别说下各种命令：**
 
 ```shell
 php easyswoole start
+```
+让我们探索在命令行下执行这行代码后，easyswoole到底做了什么？ 看代码
+
+```php
+// easyswoole 文件
+case 'start':
+    installCheck();  // 检查easyswoole框架是否搭建了起来，这个函数其实是判断easyswoole.install 文件是否存在来判断
+    serverStart($options); //这才是主心骨
+```
+_serverStart()_ 这个函数才是主要执行内容。而在该函数中最重要的又是以下：
+```php
+//easyswoole 文件
+$conf    = Conf::getInstance();  // 这个就是获取配置文件config.php的信息，如何获取的可看前文的配置文件章节
+$inst    = Core::getInstance()->initialize(); // 一目了然，这就获取核心函数的实例，执行初始化函数，所以这是**重点之处**哦， use EasySwoole\Core\Core;
+```
+接下来我们看重点之处的文件，来于 **use EasySwoole\Core\Core;** ，首先让我们看下 **initialize（）**函数。
+```php
+Di::getInstance()->set(SysConst::VERSION,'2.1.1'); //这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期的程序全局期
+Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
+//创建全局事件容器
+$event = $this->eventHook();
+$this->sysDirectoryInit();
+$event->hook('frameInitialize');
+$this->errorHandle();
+return $this;
 ```
