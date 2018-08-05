@@ -49,7 +49,7 @@ Array(
 ```shell
 php easyswoole start
 ```
-让我们探索在命令行下执行这行代码后，easyswoole到底做了什么？ 看代码
+让我们探索在命令行下执行这行代码后，easyswoole到底做了什么？ 看代码[^1]
 
 ```php
 // easyswoole 文件
@@ -63,7 +63,7 @@ _serverStart()_ 这个函数才是主要执行内容。而在该函数中最重�
 $conf    = Conf::getInstance();  // 这个就是获取配置文件config.php的信息，如何获取的可看前文的配置文件章节
 $inst    = Core::getInstance()->initialize(); // 一目了然，这就获取核心函数的实例，执行初始化函数，所以这是**重点之处**哦， use EasySwoole\Core\Core;
 ```
-接下来我们看重点之处的文件，来于 **use EasySwoole\Core\Core;** ，首先让我们看下 **initialize（）**函数。
+接下来我们看重点之处的文件，来于 **use EasySwoole\Core\Core;** 首先让我们看下 **initialize（）**函数。
 ```php
 Di::getInstance()->set(SysConst::VERSION,'2.1.1'); 
 Di::getInstance()->set(SysConst::HTTP_CONTROLLER_MAX_DEPTH,3);
@@ -76,4 +76,8 @@ return $this;
 ```
 *`Di::getInstance()->set(SysConst::VERSION,'2.1.1');`这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期(程序全局期，进程全局期、会话期、请求期)的程序全局期，也就是说一旦程序启动，是没法通过reload来重新加载配置文件的，但是却可以在服务启动前，通过代码修改配置或者设置配置信息*
 
+接下来我的重点介绍**全局事件容器**这个东东，`$event = $this->eventHook();`,这语句就是`EasySwooleEvent`前要准备，easyswoole的有四个全局事件（框架初始化事件、主服务创建事件、请求事件、响应后事件），而`$event->hook('frameInitialize');`就是执行框架初始化处理，按照easyswoole文档的说明，这里框架初始化，可以做全局异常捕捉处理、so on;
 
+
+
+[^1]:你说啥就是啥
