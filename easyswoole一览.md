@@ -79,8 +79,7 @@ $event->hook('frameInitialize');
 $this->errorHandle();
 return $this;
 ```
-*`Di::getInstance()->set(SysConst::VERSION,'2.1.1');`这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期(程序全局期，进程全局期、会话期、请求期)的程序全局期，也就是说一旦程序启动，是没法通过reload来重新加载配置文件的，但是却可以在服务启动前，通过代码修改配置或者设置配置信息*
-
+*`Di::getInstance()->set(SysConst::VERSION,'2.1.1');`这个对核心内容无大牵涉，但我还是向谈谈，就是配置文件内容，是处于对象四层生命周期(程序全局期，进程全局期、会话期、请求期)的程序全局期，也就是说一旦程序启动，是没法通过reload来重新加载配置文件的，但是却可以在服务启动前，通过代码修改配置或者设置配置信息*  
 接下来我的重点介绍**全局事件容器**这个东东，`$event = $this->eventHook();`,这语句就是`EasySwooleEvent`前要准备，easyswoole的有四个全局事件（框架初始化事件、主服务创建事件、请求事件、响应后事件），而`$event->hook('frameInitialize');`就是执行框架初始化处理，按照easyswoole文档的说明，这里框架初始化，可以做全局异常捕捉处理（$this->errorHandle();）、创建临时目录(`$this->sysDirectoryInit();`)、还有其它的设置配置文件的操作;
 `$this->sysDirectoryInit()`，主要是设置程序pid文件，和swoole.log文件
 `$this->errorHandle()`,主要是设置异常注册和处理，对于异常处理可以参考 [PHP错误与异常处理](https://www.cnblogs.com/zyf-zhaoyafei/p/6928149.html)
@@ -170,8 +169,11 @@ if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self
 继续就是，注册默认的回调事件了，easyswoole的回调事件都在`EasySwoole\Core\Swoole\EventHelper`文件里面定义好了，接下来我们就说说EventHelper里面的各个默认回调函数。  
 
 `OnWorkerStart` 看上面代码，我们可以发现easyswoole只是做了对象池初始化处理，还有对worker进程的重命名处理。  
-`EventHelper::registerDefaultOnTask($register);`  异步任务处理，easyswoole支持处理closure和class->method的时间回调，要是通过后面一种方式处理，则需要继承抽象__EasySwoole\Core\Swoole\Task\AbstractAsyncTask__，其中有run()和finish()方法，分别执行启动任务和任务完成后的执行函数。值得一提到的是，使用了swoole的==barrier==,可执行多任务，以及对超时任务的处理。详细可参考官方文档 [点击查看](https://www.easyswoole.com/Manual/2.x/Cn/_book/Advanced/async_task.html)；  
-`EventHelper::registerDefaultOnPipeMessage($register);`当工作进程收到由 [sendMessage](https://wiki.swoole.com/wiki/page/363.html) 发送的管道消息时会触发onPipeMessage事件。worker/task进程都可能会触发onPipeMessage事件。在easyswoole中，自定义进程发送异步任务，就是用了PipeMessage,推送消息到worker进程或task进程，
+`EventHelper::registerDefaultOnTask($register);`  异步任务处理，easyswoole支持处理closure和class->method的时间回调，这也许就是他的风格，通过传输对象到执行处，再通过执行对象方法，来处理要执行的任务，要是通过后面一种方式处理，则需要继承抽象__EasySwoole\Core\Swoole\Task\AbstractAsyncTask__，其中有run()和finish()方法，分别执行启动任务和任务完成后的执行函数。值得一提到的是，使用了swoole的==barrier==,可执行多任务，以及对超时任务的处理。详细可参考官方文档 [点击查看](https://www.easyswoole.com/Manual/2.x/Cn/_book/Advanced/async_task.html)；  
+`EventHelper::registerDefaultOnPipeMessage($register);`当工作进程收到由 [sendMessage](https://wiki.swoole.com/wiki/page/363.html) 发送的管道消息时会触发onPipeMessage事件。worker/task进程都可能会触发onPipeMessage事件。在easyswoole中，自定义进程发送异步任务，就是用了PipeMessage,推送消息到worker进程或task进程,具体可看**EasySwoole\Core\Swoole\Task\TaskManager::processAsync**,还有easyswoole是直接传输了一个序列化对象投递任务。  
+这里需要注意一点，似乎目前现在的框架都喜欢使用闭包函数来处理回调，就相当于注册一个函数，然后在执行注册函数之后，再使用类似`call_user_func`的函数来执行闭包函数，这样的话，感觉是很优雅，也是主流，所以须得多多熟悉。  
+
+
 
 
 
