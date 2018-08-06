@@ -131,7 +131,36 @@ return $this->mainServer;
 
 ```
 `$this->finalHook($register)`,这个单独拿出来讲一讲，做了*实例化对象池管理*,还有绑定各种回调函数。
+```php
+//EasySwoole\Core\Swoole\ServerManager 文件
 
+//实例化对象池管理
+PoolManager::getInstance();
+$register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
+    PoolManager::getInstance()->__workerStartHook($workerId);
+    $workerNum = Config::getInstance()->getConf('MAIN_SERVER.SETTING.worker_num');
+    $name = Config::getInstance()->getConf('SERVER_NAME');
+    if(PHP_OS != 'Darwin'){
+        if($workerId <= ($workerNum -1)){
+            $name = "{$name}_Worker_".$workerId;
+        }else{
+            $name = "{$name}_Task_Worker_".$workerId;
+        }
+        cli_set_process_title($name);
+    }
+});
+EventHelper::registerDefaultOnTask($register);
+EventHelper::registerDefaultOnFinish($register);
+EventHelper::registerDefaultOnPipeMessage($register);
+$conf = Config::getInstance()->getConf("MAIN_SERVER");
+if($conf['SERVER_TYPE'] == self::TYPE_WEB_SERVER || $conf['SERVER_TYPE'] == self::TYPE_WEB_SOCKET_SERVER){
+    if(!$register->get($register::onRequest)){
+        EventHelper::registerDefaultOnRequest($register);
+    }
+}
+```
+`PoolManager::getInstance()`,这里是根据配置文件 **POOL_MANAGER**获取对象池配置，官方文档有提供了MYSQL连接池的例子，[文档链接](https://www.easyswoole.com/Manual/2.x/Cn/_book/CoroutinePool/mysql_pool.html)，当然这个需要在Config.php配置才会启用。==注意：easyswoole的连接池是保存在table里面的==，然后等到workerStart后，执行`PoolManager::getInstance()->__workerStartHook($workerId);`,在这个worker进程内生成连接池，那他这个连接池是怎么实现的呢，比如说你这个连接池要做五个对象，首先你就得生成五个对象，然后保存在table里，然后如何获取这个池呢，它提供了个`getPool`的方法，拿到连接池了，就可以通过`getObj`从连接池中取出一个对象，使用完之后，比如说是查完数据库后，就是用`freeObj`,释放这个对象，重新回到池里供使用。
+其实，`getObj`这里面也有文章，它是将连接池当做是一个 SplQueue队列对象，`getObj`就是出列，`freeObj`就是入列，倘若队列为空时，就是新建一个对象临时使用。具体的逻辑可以详见**EasySwoole\Core\Component\Pool\AbstractInterface\Pool**文件
 
 
 
