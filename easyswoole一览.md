@@ -315,8 +315,22 @@ function serverRestart($options)
 _ _ _
 
 现在看看`Cache`,我们前文提到，这里的cache是基于swoole的table内存操作模块的，所以说要了解easyswoole的Cache，我们先深入了解下table。这里是swoole文档的解释[点击查看](https://wiki.swoole.com/wiki/page/p-table.html)
-
-
+```php
+use Swoole\Table;
+$table = new \Swoole\Table(1024);
+$table->column('data',Table::TYPE_STRING, 10);
+$table->create();
+$table->set(1,['data'=>'here']);
+var_dump($table->get(1));
+```
+输出:
+```php
+array(1) {
+  ["data"]=>
+  string(4) "here"
+}
+```
+注意的是，swoole的table是在创建时就确定了内存大小的了，所以需要谨慎确认范围。而且操作table感觉就像是运行服务时创建了一个数据表，行数是有限制的，每一行的子段时确定的，但是保存每一行的键值是自己由自己定的。
 
 
 
