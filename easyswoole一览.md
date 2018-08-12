@@ -314,6 +314,7 @@ function serverRestart($options)
 
 _ _ _
 
+####Cache
 现在看看`Cache`,我们前文提到，这里的cache是基于swoole的table内存操作模块的，所以说要了解easyswoole的Cache，我们先深入了解下table。这里是swoole文档的解释[点击查看](https://wiki.swoole.com/wiki/page/p-table.html)
 ```php
 use Swoole\Table;
@@ -427,7 +428,40 @@ ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
         $this->run($this->swooleProcess);
     }
 ```
-上文代码中注释说得很清楚，主要把自定义进程加入到主服务的manager进程中，并且注册进程启动函数`__start`,然后，manager管理进程启动时，也会一起启动自定义进程，然后执行`__start`函数，这就自定义进程的启动过程了。
+上文代码中注释说得很清楚，主要把自定义进程加入到主服务的manager进程中，并且注册进程启动函数`__start`,然后，manager管理进程启动时，也会一起启动自定义进程，然后执行`__start`函数，这就自定义进程的启动过程了。  
+
+接下来,我们开始讲easyswoole的cache是如何存取的.现在大概说一个过程.  
+首先,收到`Cache->set()`,设置缓存,我们看下代码
+```php
+public function set($key,$data)
+    {
+        if(!ServerManager::getInstance()->isStart()){
+            $this->cliTemp->set($key,$data);
+        }
+        if(ServerManager::getInstance()->getServer()){
+            $num = $this->keyToProcessNum($key); //通过取模返回一个worker_id
+            $msg = new Msg(); // 传输的消息实例
+            $msg->setCommand('set');
+            $msg->setArg('key',$key);
+            $msg->setData($data);
+            //表示在worker进程调用set方法时,会随即返回个自定义进程实例,并且往这个实例进程管道里面发送消息,反送的时经过序列化的Msg对象
+            ProcessManager::getInstance()->getProcessByName($this->generateProcessName($num))->getProcess()->write(\swoole_serialize::pack($msg));
+        }
+    }
+```
+我们可以看到,往自定义进程里面发送了消息,而在之前我们就提到,自定义进程在启动时,就已经把管道加进了eventloop,并读取了消息.而且通过反序列化,拿到约定的数据进行处理,看`CacheProcess->onReceive()`,就知道,各种command的处理情况.  
+
+还可以小结下:**就是easyswoole的所有IPC进程间通信,好像都是通过传输序列化闭包,或者序列化对象,然后按照自定义的处理方式,来执行传输内容,这样可操作空间就很大了,可以借鉴下.**
+
+
+好了,Cache篇我们就说到这里,接下来,我们开始说 EVENT了.
+
+
+_ _ _
+
+####Event
+
+event在服务启动前担任着一个非常重要的角色
 
 
 
