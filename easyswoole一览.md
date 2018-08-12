@@ -330,8 +330,54 @@ array(1) {
   string(4) "here"
 }
 ```
-注意的是，swoole的table是在创建时就确定了内存大小的了，所以需要谨慎确认范围。而且操作table感觉就像是运行服务时创建了一个数据表，行数是有限制的，每一行的子段时确定的，但是保存每一行的键值是自己由自己定的。
+注意的是，swoole的table是在创建时就确定了内存大小的了，所以需要谨慎确认范围。而且操作table感觉就像是运行服务时创建了一个数据表，行数是有限制的，每一行的子段时确定的，但是保存每一行的键值是自己由自己定的。*但是这里主要讲的是easyswoole的框架，至于swoole拓展的各个模块，需另开新篇再做详讨，那是更大的世界*。  
 
+好了，回到easyswoole,说到easyswoole的Cache,让我们这个模块下的相关文件
+```php
+namespace EasySwoole\Core\Component\Cache;
+
+Cache.php  //实例化Cache对象，以及提供cache的操作方法(get,set, so on)
+CacheProcess.php  //easyswoole的Cache是保存在一个自定义进程里面的，然后利用swoole的IPC通讯，实现worker进程和Cache进程间的读写。注：也是在这里实现的Cache落地，也就是写入磁盘。
+Msg.php //这个是消息传送对象，就是对Cache操作时，其实就是对一个msg实例对象的操作读写
+Utility.php // 读写落地磁盘缓存信息的工具类
+
+```
+其实有关的还有
+```php
+use EasySwoole\Core\Swoole\Memory\TableManager  \\主要是对table实例的管理（增删）
+use EasySwoole\Core\Swoole\Process\ProcessManager  \\同样，这是对自定义进程的管理(增删取)
+```
+接下来让我们看看easyswoole是如何把文件相关联起来的。从头开始，Cache进程是在服务启动前执行`EasySwoole\Core\Swoole\ServerManager::start()`里面的`Cache::getInstance();`看代码
+```php
+    function __construct()
+    {
+        $num = intval(Config::getInstance()->getConf("EASY_CACHE.PROCESS_NUM")); //要在配置文件中填写缓存进程数量
+        if($num <= 0){  //小于零即是不设立缓存进程
+           return;
+        }
+        $this->cliTemp = new SplArray();
+        //若是在主服务创建，而非单元测试调用
+        if(ServerManager::getInstance()->getServer()){
+            //创建table用于数据传递
+            TableManager::getInstance()->add(self::EXCHANGE_TABLE_NAME,[
+                'data'=>[
+                    'type'=>Table::TYPE_STRING, // 缓存数据体
+                    'size'=>10*1024
+                ],
+                'microTime'=>[
+                    'type'=>Table::TYPE_STRING,  //数据落地磁盘延迟时间
+                    'size'=>15
+                ]
+            ],2048);
+            $this->processNum = $num;  // 缓存进程数量
+            for ($i=0;$i < $num;$i++){
+                ProcessManager::getInstance()->addProcess($this->generateProcessName($i),CacheProcess::class);  //创建缓存进程
+            }
+        }
+    }
+```
+就是这几十行代码，完成了缓存及其管理进程的关联工作。我们先大概说下其中的执行内容。  
+首先，我们先创建了一个table实例，并且把它保存在`TableManager`对象里，名为_Cache_。*（注：easyswoole服务启动前，所有的table实例都将保存在`TableManager`对象里管理）*，然后我们再创建自定义进程，`addProcess()`,接受两个参数，第一个是进程名称，第二个进程执行类，该类继承于抽象类`EasySwoole\Core\Swoole\Process\AbstractProcess`,执行其抽象方法。*（注：进程pid也有保存在`TableManager`对象里面，名为_process_hash_map_）*
 
 
 
