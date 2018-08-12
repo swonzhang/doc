@@ -371,13 +371,63 @@ use EasySwoole\Core\Swoole\Process\ProcessManager  \\同样，这是对自定义
             ],2048);
             $this->processNum = $num;  // 缓存进程数量
             for ($i=0;$i < $num;$i++){
-                ProcessManager::getInstance()->addProcess($this->generateProcessName($i),CacheProcess::class);  //创建缓存进程
+               //创建缓存进程
+                ProcessManager::getInstance()->addProcess($this->generateProcessName($i),CacheProcess::class);
             }
         }
     }
 ```
 就是这几十行代码，完成了缓存及其管理进程的关联工作。我们先大概说下其中的执行内容。  
-首先，我们先创建了一个table实例，并且把它保存在`TableManager`对象里，名为_Cache_。*（注：easyswoole服务启动前，所有的table实例都将保存在`TableManager`对象里管理）*，然后我们再创建自定义进程，`addProcess()`,接受两个参数，第一个是进程名称，第二个进程执行类，该类继承于抽象类`EasySwoole\Core\Swoole\Process\AbstractProcess`,执行其抽象方法。*（注：进程pid也有保存在`TableManager`对象里面，名为_process_hash_map_）*
+首先，我们先创建了一个table实例，并且把它保存在`TableManager`对象里，名为_Cache_。*（注：easyswoole服务启动前，所有的table实例都将保存在`TableManager`对象里管理）*，然后我们再创建自定义进程，`addProcess()`,接受两个参数，第一个是进程名称，第二个进程执行类，该类继承于抽象类`EasySwoole\Core\Swoole\Process\AbstractProcess`,执行其抽象方法。*（注：进程pid也有保存在`TableManager`对象里面，名为_process\_hash\_map_）*,这其中用到swoole_process的管道通信（write,read）。  
+  **在这里，我们需要小结下easyswoole框架的套路。都是结合业务，围绕这swoole进行展开。而且，每一类与swoole相关的模块，差不多都有管理类来进行管理。`ServerManager、TableManager、ProcessManager、TaskManager`,这些对象保存着实例，在服务期间，常驻与内存间，并且可供操作管理。**  
+  现在我们着重说下`addProcess`,其实这也是个幌子，真相往往在后面。看代码
+```php
+$process = new $processClass($processName,$args,$async);
+$this->processList[$key] = $process;
+```
+这里new了一个类，这个类就是上文提到的`CacheProcess::class`,我们跑到这个类下面看构造函数，并没有啥，重点是父级的构造函数里
+```php
+EasySwoole\Core\Swoole\Process\AbstractProcess; 文件
+
+$this->swooleProcess = new \swoole_process([$this,'__start'],false,2);
+ServerManager::getInstance()->getServer()->addProcess($this->swooleProcess);
+
+```
+可以看到是在这里创建了一个自定义进程，定义了进程启动后的函数，管道类型。并托管到了manager进程中去了，不了解这操作的可[点击查看](https://wiki.swoole.com/wiki/page/390.html)；事实上，我们更在意的是`__start`函数，进程启动后，他干了啥。
+```php
+    function __start(Process $process)
+    {
+        if(PHP_OS != 'Darwin'){
+            $process->name($this->getProcessName());
+        }
+         //我们前文说到,自定义进程也有用到table来保存pid，以备用来干掉它？手动笑哭...
+        TableManager::getInstance()->get('process_hash_map')->set(
+            md5($this->processName),['pid'=>$this->swooleProcess->pid]
+        );
+        //前文同样说到,easyswoole通过一系列管理类来管理内存，或进程，下面就是把一个实例保存在manager里
+        ProcessManager::getInstance()->setProcess($this->getProcessName(),$this);
+        if (extension_loaded('pcntl')) {
+            pcntl_async_signals(true);
+        }
+        // 遇到关闭信号时 所执行
+        Process::signal(SIGTERM,function ()use($process){
+            $this->onShutDown();
+            TableManager::getInstance()->get('process_hash_map')->del(md5($this->processName));
+            swoole_event_del($process->pipe);
+            $this->swooleProcess->exit(0);
+        });
+        if($this->async){
+        // 这就是进程管道通讯的核心所在，通过eventloop事件监听，获取管道消息
+            swoole_event_add($this->swooleProcess->pipe, function(){
+                $msg = $this->swooleProcess->read(64 * 1024); //读取管道消息
+                $this->onReceive($msg); //自定义收到管道消息时处理
+            });
+        }
+        // 最后，执行自定义进程函数
+        $this->run($this->swooleProcess);
+    }
+```
+上文代码中注释说得很清楚，主要把自定义进程加入到主服务的manager进程中，并且注册进程启动函数`__start`,然后，manager管理进程启动时，也会一起启动自定义进程，然后执行`__start`函数，这就自定义进程的启动过程了。
 
 
 
