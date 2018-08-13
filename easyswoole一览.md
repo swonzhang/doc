@@ -2,6 +2,8 @@
 最近自己也在使用swoole搭建框架，由于之前使用了easyswoole,自己在构思过程中，自然而然地会要借鉴easyswoole里面的一些精髓。但是随着工作进行下去，会感觉有许多的模糊的地方。所以现在做个整理一览出来。
 _（注：本说明文档有点抽丝剥茧的意思，所以可能会对每个相关的内容进行有点深度的探究）_
 
+**强调下：本文档是基于easyswoole v2.1.2**  
+
 ==在开始之前，我还需得强调一句 ++一切皆对象++ ==
 
 **我先列下几个提纲**
@@ -461,11 +463,37 @@ _ _ _
 
 ####Event
 
-event在服务启动前担任着一个非常重要的角色
+event在服务启动前担任着一个非常重要的角色，所有回调事件都注册在这里，在这里，我们学习一下它的思想。
+>其实，工具都只是为了更好的开发，而event在这里就是一个非常好的工具。
+
+突然觉得这里好像也没哈东西讲的，无非就是把所有的事件回调都保存在Event对象里面，然后在通过Event一一注册到Server上。看代码,这一段好像上面贴过了：
+```php
+
+//创建默认的事件注册器
+$register = new EventRegister();
+$events = $register->all();
+foreach ($events as $event => $callback){
+    $this->mainServer->on($event, function () use ($callback) {
+        $ret = [];
+        $args = func_get_args();
+        foreach ($callback as $item) {
+            array_push($ret,Invoker::callUserFuncArray($item, $args));
+        }
+        if(count($ret) > 1){
+            return $ret;
+        }
+        return array_shift($ret);
+    });
+}
+```
+好了，这段就讲到这里，接下来再看看Rpc啊，Pool啊，Cluster啊，想想都有些激动。
 
 
+_ _ _
 
+#### Pool
 
+接下里，我们讲讲Easyswoole的pool，池子。。注意，这个池子并不是进程池，而是一些连接服务的客户端池子，即是Client Pool.并且是在workStart后启动。也就是说保存在worker/task进程里。
 
 
 
