@@ -493,8 +493,6 @@ _ _ _
 
 #### Pool
 
-接下里，我们讲讲Easyswoole的pool，池子。。注意，这个池子并不是进程池，而是一些连接服务的客户端池子，即是Client Pool.并且是在workStart后启动。也就是说保存在worker/task进程里。
-
-
-
+接下里，我们讲讲Easyswoole的pool，池子。。注意，这个池子并不是进程池，而是一些连接服务的客户端池子，即是Client Pool 连接池.并且是在workStart后启动。也就是说保存在worker/task进程里。看看swoole文档是怎么介绍的[点击查看](https://wiki.swoole.com/wiki/page/350.html)  
+官方文档里有说了两个例子 redis连接池和mysql连接池
 
