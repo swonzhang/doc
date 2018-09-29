@@ -91,6 +91,8 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
 		直接 /usr/local/php7/bin/pecl install swoole
 		然后在 php.ini 文件里添加 extension = redis.so  重启 php-fpm，至此，php -m 就可以看到redis模块了（不重启也可以看到，但实际上还没加载在php-fpm里）
 
+	
+	有些系统是没有pecl 的，需要自己安装 参考 https://blog.csdn.net/koastal/article/details/52850416
 
 ###用PHP怎么少得了composer呢，composer的安装也简单，直接下载 ： 
 

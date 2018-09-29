@@ -11,18 +11,22 @@ yum -y install python-pip
 
 安装opencv
 ```shell
-pip install opency-python
+pip install opencv-python
 
 # 以上报错的话，需要用国内镜像源来加速，以下
 
-pip install pymongo -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+pip install opencv-python -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
 
 
 ```
 安装dlib
 ```
 
-yum install python-devel.x86_64 cmake
+yum -y install python-devel.x86_64 cmake
+
+#或者 ubantu
+
+apt-get -y install python-dev cmake
 
 #这个耗时极长，而且内存得够，空余3G以上吧 不然会报错 c++: internal compiler error: Killed (program cc1plus)
 
