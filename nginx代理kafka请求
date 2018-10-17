@@ -25,7 +25,7 @@
 
 		ok，完工， "nginx -t",配置没错，重启nginx , nginx -s reload
 
-	3、好，现在可以测试了，使用 kafka-php的测试代码去请求kafka,额，没用啊。。。报 “Recv failure: Connection reset by peer”
+	3、好，现在可以测试了，使用 kafka-php的测试代码去请求kafka,额，没用啊。。。报 “Recv failure: Connection reset by peer” (应该是宿主机只能接受80端口 https协议的)
 
 		这下我就郁闷了，然后去群里咨询各位大神，我才恍然大悟，nginx代理的是http协议，而kafka使用的是tcp协议啊，这下子麻烦了，然后我就各种百度谷歌，发现了个“Nginx Kafka Module”,nginx组件，专门用来代理kafka的，(refer:https://github.com/brg-liuwei/ngx_kafka_module#table-of-contents),我如获新生，然后按照其中步骤安装，安装详细上面连接中皆有说明，我就说下自己遇到的坑。
 
