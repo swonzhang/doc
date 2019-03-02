@@ -17,4 +17,50 @@
 		swoft
 
 		protobuf, thrift, grpc, zookeeper 	 hprose 
-协议
+	
+		protobuf
+
+		tars
+
+		csp (communicating sequential process) 并发系统交互模式的形式化语言，通过channel 通信
+		actors 使用消息机制来进行并发
+
+
+		文本协议  二进制协议  通信协议
+
+		
+
+
+接口设计方案：  rest、rpc、graphql、Webhooks
+
+REST
+
+>REST 也许是最通用，也是最常用的接口设计方案，它是 无状态的，以资源为核心，针对如何操作资源定义了一系列 URL 约定，而操作类型通过 GET POST PUT DELETE 等 HTTP Methods 表示。
+
+REST 基于原生 HTTP 接口，因此改造成本很小，而且其无状态的特性，降低了前后端耦合程度，利于快速迭代。
+
+随着未来发展，REST 可能更适合提供微服务 API。 
+
+gRPC
+gRPC 是对 RPC 的一个新尝试，最大特点是使用 protobufs 语言格式化数据。
+
+RPC 主要用来做服务器之间的方法调用，影响其性能最重要因素就是 序列化/反序列化 效率。RPC 的目的是打造一个高效率、低消耗的服务调用方式，因此比较适合 IOT 等对资源、带宽、性能敏感的场景。而 gRPC 利用 protobufs 进一步提高了序列化速度，降低了数据包大小。
+
+也有一些额外手段将 gRPC 转换为 http 服务，让网页端也享受到其高效、低耗的好处。但是不要忘了，RPC 最常用的场景是 IOT 等硬件领域，网页场景也许不会在乎节省几 KB 的流量。
+
+
+GraphQL
+GraphQL 不是 REST 的替代品，而是另一种交互形式：前端决定后端的返回结果。
+
+GraphQL 带来的最大好处是精简请求响应内容，不会出现冗余字段，前端可以决定后端返回什么数据。但要注意的是，前端的决定权取决于后端支持什么数据，因此 GraphQL 更像是精简了返回值的 REST，而后端接口也可以一次性定义完所有功能，而不需要逐个开发。
+
+再次强调，相比 REST 和 gRPC，GraphQL 是由前端决定返回结果的反模式。
+
+
+Webhooks
+如果说 GraphQL 颠覆了前后端交互模式，那 Webhooks 可以说是彻头彻尾的反模式了，因为其定义就是，前端不主动发送请求，完全由后端推送。
+
+它最适合解决轮询问题。或者说轮询就是一种妥协的行为，当后端不支持 Webhooks 模式时。
+
+
+

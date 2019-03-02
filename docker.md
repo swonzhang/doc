@@ -129,3 +129,75 @@ docker run -d --name kafka --publish 9092:9092 --link zookeeper --env KAFKA_ZOOK
 删除docker镜像
 
 docker rm -f ******
+
+提交新镜像到私服务器
+
+docker push docker.ops.colourlife.com:5000/nginx-php71-gs
+
+
+更新私服务器镜像
+
+sudo docker commit -m "添加ghostscript" -a "zhangxiwang" 5d99f3e442dd docker.ops.colourlife.com:5000/nginx-php71-gs
+
+-m  描述   ，  -a 操作者
+此时ID为5d99f3e442dd的容器， docker.ops.colourlife.com:5000/nginx-php71-gs为后来更新者
+
+
+
+FROM docker.ops.colourlife.com:5000/nginx-php71-gs
+
+RUN wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs926/ghostscript-9.26-linux-x86_64.tgz \
+&& tar -xzvf ghostscript-9.26-linux-x86_64.tgz  \
+&& cd ghostscript-9.26-linux-x86_64 \
+&& cp gs-926-linux-x86_64 /usr/bin/gs \
+&& rm -rf ghostscript-9.26-linux-x86_64 ghostscript-9.26-linux-x86_64.tgz
+
+
+
+RUN apt-get update \
+&& apt-get install -y imagemagick
+
+docker build -t docker.ops.colourlife.com:5000/nginx-php71-gs .
+
+sudo docker commit -m "添加imagemagick" -a "zhangxiwang" 5d99f3e442dd docker.ops.colourlife.com:5000/nginx-php71-gs
+
+
+
+我们运行的容器可能在镜像的基础上做了一些修改，有时候我们希望保存起来，封装成一个更新的镜像
+
+docker自己提供的有commit功能
+
+我们以centos为例，现在我们要在一个裸的centos上面安装vim编辑器，并且把这个功能保存下来，封装成一个能执行vim命令的centos镜像
+
+拉去最新centos镜像：docker pull centos
+
+进入镜像内部： docker run -it centos /bin/bash     备注：/bin/bash不要忘了
+
+[root@202 ~]# docker run -it centos /bin/bash
+[root@afcaf46e8305 /]#
+
+afcaf46e8305是产生的容器ID，前面运行的时候不要-d后台运行了，不然会进不去容器内部的
+
+[root@afcaf46e8305 /]# yum update
+
+[root@afcaf46e8305 /]# yum install -y vim 
+
+安装完了后：exit退出容器
+
+然后把容器打包成镜像：
+
+root@202 ~]# docker commit afcaf46e8305 centos-vim
+
+完成后docker images查看镜像就会发现centos-vim这个镜像了
+
+我们再用刚刚的方法进去centos-vim这个镜像,
+
+[root@7f2d42f3e0a3 /]# vim --version
+
+就可以看到vim的信息了
+
+最后需要 docker push , 才能推到远程服务器，供下载使用
+
+docker push docker.ops.colourlife.com:5000/nginx-php71-gs:latest
+
+后面的 latest 表示是版本,要加
