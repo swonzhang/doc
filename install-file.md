@@ -32,7 +32,11 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
 	1、apache 我直接用yum 源安装了 yum -y -q install apr-devel apr-util-devel openssl-devel pcre-devel mod_ssl expat-devel
 	2、php  编译安装 可以从官网下载包，http://am1.php.net/distributions/php-7.2.4.tar.gz 
 
-	下面安装步骤，这个很全步骤：https://blog.csdn.net/u010861514/article/details/51926575
+	下面安装步骤，这个很全步骤：
+	https://blog.csdn.net/u010861514/article/details/51926575
+	https://hqidi.com/150.html
+	https://www.cnblogs.com/makecode/articles/10059099.html
+
 	首先安装依赖：
 	yum -y install gcc gcc-c++ libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel
 
@@ -47,7 +51,7 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
 	继续出问题 ：configure: error: freetype-config not found.  解决办法：yum install freetype-devel
 	继续出问题：configure: error: Please reinstall readline - I cannot find readline.h    解决办法：yum -y install readline-devel
 	
-	至此。终于编译完成，这时你有没有发现上面的一个规律，编译出了问题都是 直接 install ***-devel 包就可以解决了，我去查了资料发现 *-devel是一类开发包，主要包括了一些头文件和静态链接。在某些模块编译时，需要依赖这些 *-devel包。当然，有些包直接用yum install会出现 “没有可用软件包 *-devel”的问题，那就得下载源码安装了.
+	至此。终于编译完成，这时你有没有发现上面的一个规律，编译出了问题都是 直接 install ***-devel 包就可以解决了，我去查了资料发现 *-devel是一类开发包，主要包括了一些头文件和静态链接。在某些模块编译时，需要依赖这些 *-devel包。当然，有些包直接用yum install会出现 “没有可用软件包 *-devel”的问题，那就得下载源码安装了. 上面是centos上的安装tips,ubantu的话，则是 lib***-dev 这种格式
 	例如上面的 libtidy, 
 	wget http://tidy.sourceforge.net/src/old/tidy_src_051026.tgz
 	gunzip tidy-xxxx.tgz
@@ -93,6 +97,20 @@ yum update -y -nogpgcheck  或者 yum install packages_name -y --nogpgcheck 忘�
 
 	
 	有些系统是没有pecl 的，需要自己安装 参考 https://blog.csdn.net/koastal/article/details/52850416
+
+	安装pecl
+	cd /usr/local/php/bin/
+	wget http://pear.php.net/go-pear.phar -O go-pear.php
+	php go-pear.php
+	##回车默认安装
+	1
+	2
+	3
+	4
+	安装php扩展
+	pecl search key-word    #用于查找扩展
+	pecl install key-word   #用于安装扩展
+
 
 ###用PHP怎么少得了composer呢，composer的安装也简单，直接下载 ： 
 

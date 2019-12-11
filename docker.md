@@ -18,7 +18,8 @@ vim /etc/docker/daemon.json
 添加
 
 {
-	"registry-mirrors":["https://registry.docker-cn.com"]
+	"registry-mirrors":["https://registry.docker-cn.com"],
+  "insecure-registries": ["docker.ops.colourlife.com:5000","docker.listcloud.cn:5000"]
 }
 
 
@@ -66,6 +67,8 @@ WORKDIR /var/www/html
 
 
 编辑好之后，在相同目录下运行：docker build -t swon/nginx-php7 .
+
+-t 后面跟镜像标签名称
 
 注意后面那一点，表示是当前目录，建立后之后，docekr images,即可看到自己打包的镜像 
 

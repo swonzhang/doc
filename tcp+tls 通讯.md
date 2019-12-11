@@ -2,15 +2,22 @@
 
 参考资料： https://www.cnblogs.com/syfwhu/p/5219814.html#
 
-tcp正常通讯
+63 是客户端， 21 是服务端
 
+tcp正常通讯 
+
+三次握手
 11:51:41.720356 IP 192.168.2.63.60298 > 192.168.2.21.9501: Flags [S], seq 542865493, win 29200, options [mss 1460,sackOK,TS val 72696915 ecr 0,nop,wscale 7], length 0
 11:51:41.720421 IP 192.168.2.21.9501 > 192.168.2.63.60298: Flags [S.], seq 862544496, ack 542865494, win 28960, options [mss 1460,sackOK,TS val 210719011 ecr 72696915,nop,wscale 7], length 0
 11:51:41.720949 IP 192.168.2.63.60298 > 192.168.2.21.9501: Flags [.], ack 1, win 229, options [nop,nop,TS val 72696916 ecr 210719011], length 0
+
+数据传输
 11:51:42.722935 IP 192.168.2.63.60298 > 192.168.2.21.9501: Flags [P.], seq 1:36, ack 1, win 229, options [nop,nop,TS val 72697918 ecr 210719011], length 35
 11:51:42.722978 IP 192.168.2.21.9501 > 192.168.2.63.60298: Flags [.], ack 36, win 227, options [nop,nop,TS val 210720014 ecr 72697918], length 0
 11:51:42.735189 IP 192.168.2.21.9501 > 192.168.2.63.60298: Flags [P.], seq 1:45, ack 36, win 227, options [nop,nop,TS val 210720026 ecr 72697918], length 44
 11:51:42.735783 IP 192.168.2.63.60298 > 192.168.2.21.9501: Flags [.], ack 45, win 229, options [nop,nop,TS val 72697931 ecr 210720026], length 0
+
+断开连接
 11:51:43.736866 IP 192.168.2.63.60298 > 192.168.2.21.9501: Flags [F.], seq 36, ack 45, win 229, options [nop,nop,TS val 72698932 ecr 210720026], length 0
 11:51:43.750807 IP 192.168.2.21.9501 > 192.168.2.63.60298: Flags [F.], seq 45, ack 37, win 227, options [nop,nop,TS val 210721042 ecr 72698932], length 0
 11:51:43.751694 IP 192.168.2.63.60298 > 192.168.2.21.9501: Flags [.], ack 46, win 229, options [nop,nop,TS val 72698946 ecr 210721042], length 0
